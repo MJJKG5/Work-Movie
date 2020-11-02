@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gp.movie.repository.ScreeningMapper">
+    <resultMap id="screeningMap" type="com.gp.movie.model.Screening">
+        <id column="id" property="id"/>
+        <result column="filmId" property="filmId"/>
+        <result column="hallId" property="hallId"/>
+        <result column="cinemaId" property="cinemaId"/>
+        <result column="price" property="price"/>
+        <result column="playDate" property="playDate"/>
+        <result column="playTime" property="playTime"/>
+        <result column="endTime" property="endTime"/>
+        <result column="createTime" property="createTime"/>
+        <result column="cinemaName" property="cinemaName"/>
+        <result column="hallName" property="hallName"/>
+    </resultMap>
+
+    <sql id="screeningList">id, filmId, hallId, cinemaId, price, playDate, playTime, endTime, createTime</sql>
+
+    <select id="queryByList" resultMap="screeningMap">
+        SELECT
+            s.id AS id,
+            s.filmId AS filmId,
+            s.hallId AS hallId,
+            s.cinemaId AS cinemaId,
+            s.price AS price,
+            s.playDate AS playDate,
+            s.playTime AS playTime,
+            s.endTime AS endTime,
+            s.createTime AS createTime,
+            c.name AS cinemaName,
+            ch.name AS hallName
+        FROM
+            screening s
+        JOIN
+            cinema c
+        ON
+            s.cinemaId = c.id
+        JOIN
+            cinema_hall ch
+        ON
+            s.hallId = ch.id
+        <where>
+            <if test="null != filmId">
+                s.filmId = #{filmId}
+            </if>
+            <if test="null != cinemaId">
+                AND s.cinemaId = #{cinemaId}
+            </if>
+            <if test="null != cinemaName and '' != cinemaName">
+                AND c.cinemaName = #{cinemaName}
+            </if>
+            <if test="null != playDate and '' != playDate">
+                AND s.playDate &gt;= #{playDate}
+            </if>
+        </where>
+        LIMIT
+            #{page.index}, #{page.pageSize}
+    </select>
+
+    <select id="queryByFilmId" resultMap="screeningMap">
+        SELECT
+            s.id AS id,
+            s.filmId AS filmId,
+            s.hallId AS hallId,
+            s.cinemaId AS cinemaId,
+            s.price AS price,
+            s.playDate AS playDate,
+            s.playTime AS playTime,
+            s.endTime AS endTime,
+            s.createTime AS createTime
+        FROM
+            screening s,
+            ( SELECT MIN( id ) id FROM screening GROUP BY cinemaId ) s1
+        WHERE
+            s.id = s1.id
+        AND
+            s.filmId = #{filmId}
+        AND
+            s.playTime &gt; NOW()
+    </select>
+
+    <select id="queryByCinemaIdAndFilmId" resultMap="screeningMap">
+        SELECT
+            <include refid="screeningList"/>
+        FROM
+            screening
+        WHERE
+            cinemaId = #{cinemaId}
+    <if test="null != playDate and '' != playDate">
+        AND
+            playDate = #{playDate}
+    </if>
+        AND
+            playTime &gt; now()
+        AND
+            filmId = #{filmId}
+    </select>
+
+    <select id="queryById" resultType="com.gp.movie.model.Screening">
+        SELECT
+            <include refid="screeningList"/>
+        FROM
+            screening
+        WHERE
+            id = #{id}
+    </select>
+
+    <insert id="add" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO screening
+            (filmId, hallId, cinemaId, price, playDate, playTime, endTime)
+        VALUES
+            (#{screening.filmId}, #{screening.hallId}, #{screening.cinemaId}, #{screening.price}, #{screening.playDate}, #{screening.playTime}, #{screening.endTime})
+    </insert>
+
+    <update id="update">
+        UPDATE screening
+        <set>
+            <if test="null != screening.filmId">
+                filmId = #{screening.filmId},
+            </if>
+            <if test="null != screening.hallId">
+                hallId = #{screening.hallId},
+            </if>
+            <if test="null != screening.cinemaId">
+                cinemaId = #{screening.cinemaId},
+            </if>
+            <if test="null != screening.price">
+                price = #{screening.price},
+            </if>
+            <if test="null != screening.playDate">
+                playDate = #{screening.playDate},
+            </if>
+            <if test="null != screening.playTime">
+                playTime = #{screening.playTime},
+            </if>
+            <if test="null != screening.endTime">
+                endTime = #{screening.endTime},
+            </if>
+        </set>
+        WHERE
+            id = #{screening.id}
+    </update>
+
+    <delete id="delete">
+        DELETE FROM screening WHERE id = #{id}
+    </delete>
+
+    <delete id="deleteByFilmId">
+        DELETE FROM screening WHERE filmId = #{filmId}
+    </delete>
+
+    <select id="count" resultType="java.lang.Long">
+        SELECT
+            COUNT(s.id)
+        FROM
+            screening s
+        JOIN
+            cinema c
+        ON
+            s.cinemaId = c.id
+        <where>
+            <if test="null != filmId">
+                s.filmId = #{filmId}
+            </if>
+            <if test="null != cinemaId">
+                s.id = #{cinemaId}
+            </if>
+            <if test="null != cinemaName and '' != cinemaName">
+                c.name = #{cinemaName}
+            </if>
+            <if test="null != playDate and '' != playDate">
+                s.playDate &gt;= #{playDate}
+            </if>
+        </where>
+    </select>
+</mapper>

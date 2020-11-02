@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gp.movie.repository.FilmMapper">
+    <resultMap id="filmMap" type="com.gp.movie.model.Film">
+        <id column="id" property="id"/>
+        <result column="name" property="name"/>
+        <result column="alias" property="alias"/>
+        <result column="status" property="status"/>
+        <result column="director" property="director"/>
+        <result column="starring" property="starring"/>
+        <result column="score" property="score"/>
+        <result column="type" property="type"/>
+        <result column="language" property="language"/>
+        <result column="country" property="country"/>
+        <result column="runTime" property="runTime"/>
+        <result column="releaseTime" property="releaseTime"/>
+        <result column="img" property="img"/>
+        <result column="intro" property="intro"/>
+    </resultMap>
+
+    <sql id="filmList">id, `name`, alias, status, director, starring, score, `type`, `language`, country, runTime, releaseTime, img, intro</sql>
+
+    <select id="queryByList" resultMap="filmMap">
+        SELECT
+            <include refid="filmList"/>
+        FROM
+            film
+        <if test="null != name and '' != name">
+        WHERE
+            `name` = #{name}
+        </if>
+        LIMIT
+            #{page.index}, #{page.pageSize}
+    </select>
+
+    <select id="queryById" resultType="com.gp.movie.model.Film">
+        SELECT
+            <include refid="filmList"/>
+        FROM
+            film
+        WHERE
+            id = #{id}
+    </select>
+
+    <insert id="add" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO film
+            (`name`, alias, director, starring, score, `type`, `language`, country, runTime, releaseTime, img, intro)
+        VALUES
+            (#{film.name}, #{film.alias}, #{film.director}, #{film.starring}, #{film.score}, #{film.type}, #{film.language}, #{film.country}, #{film.runTime}, #{film.releaseTime}, #{film.img}, #{film.intro})
+    </insert>
+
+    <update id="update">
+        UPDATE film
+        <set>
+            <if test="null != film.name and '' != film.name">
+                `name` = #{film.name},
+            </if>
+            <if test="null != film.alias and '' != film.alias">
+                alias = #{film.alias},
+            </if>
+            <if test="null != film.status and '' != film.status">
+                status = #{film.status},
+            </if>
+            <if test="null != film.director and '' != film.director">
+                director = #{film.director},
+            </if>
+            <if test="null != film.starring and '' != film.starring">
+                starring = #{film.starring},
+            </if>
+            <if test="null != film.score">
+                score = #{film.score},
+            </if>
+            <if test="null != film.type and '' != film.type">
+                `type` = #{film.type},
+            </if>
+            <if test="null != film.language and '' != film.language">
+                `language` = #{film.language},
+            </if>
+            <if test="null != film.country and '' != film.country">
+                country = #{film.country},
+            </if>
+            <if test="null != film.runTime">
+                runTime = #{film.runTime},
+            </if>
+            <if test="null != film.releaseTime">
+                releaseTime = #{film.releaseTime},
+            </if>
+            <if test="null != film.img and '' != film.img">
+                img = #{film.img},
+            </if>
+            <if test="null != film.intro and '' != film.intro">
+                intro = #{film.intro}
+            </if>
+        </set>
+        WHERE
+            id = #{film.id}
+    </update>
+
+    <delete id="delete">
+        DELETE FROM film WHERE id = #{id}
+    </delete>
+
+    <select id="count" resultType="java.lang.Long">
+        SELECT
+            COUNT(id)
+        FROM
+            film
+        <if test="null != name and '' != name">
+        WHERE
+            `name` = #{name}
+        </if>
+    </select>
+</mapper>

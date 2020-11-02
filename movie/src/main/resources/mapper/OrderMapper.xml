@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gp.movie.repository.OrderMapper">
+    <resultMap id="orderMap" type="com.gp.movie.model.Order">
+        <id column="id" property="id"/>
+        <result column="accountId" property="accountId"/>
+        <result column="cinemaId" property="cinemaId"/>
+        <result column="cinemaName" property="cinemaName"/>
+        <result column="hallId" property="hallId"/>
+        <result column="hallName" property="hallName"/>
+        <result column="screenId" property="screenId"/>
+        <result column="filmId" property="filmId"/>
+        <result column="filmName" property="filmName"/>
+        <result column="seatName" property="seatName"/>
+        <result column="number" property="number"/>
+        <result column="price" property="price"/>
+        <result column="createTime" property="createTime"/>
+        <result column="address" property="address"/>
+        <result column="playTime" property="playTime"/>
+        <result column="img" property="img"/>
+    </resultMap>
+
+    <sql id="orderList">id, accountId, cinemaId, hallId, screenId, filmId, seatName, `number`, price, createTime</sql>
+
+    <select id="queryByList" resultMap="orderMap">
+        SELECT
+            o.id AS id,
+            o.cinemaId AS cinemaId,
+            c.name AS cinemaName,
+            o.hallId AS hallId,
+            ch.name AS hallName,
+            o.filmId AS filmId,
+            o.screenId AS screenId,
+            f.name AS filmName,
+            o.seatName AS seatName,
+            o.number AS number,
+            o.price AS price,
+            o.createTime AS createTime,
+            c.address AS address,
+            sc.playTime AS playTime,
+            f.img AS img
+        FROM
+            `order` o
+        JOIN
+            cinema c
+        ON
+            o.cinemaId = c.id
+        JOIN
+            cinema_hall ch
+        ON
+            o.hallId = ch.id
+        JOIN
+            screening sc
+        ON
+            o.screenId = sc.id
+        JOIN
+            film f
+        ON
+            o.filmId = f.id
+        <where>
+            o.accountId = #{accountId}
+            <if test="null != id">
+                id = #{id}
+            </if>
+
+        </where>
+        LIMIT
+            #{page.index}, #{page.pageSize}
+    </select>
+
+    <insert id="add" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO `order`
+            (accountId, cinemaId, hallId, screenId, filmId, seatName, `number`, price)
+        VALUES
+            (#{order.accountId}, #{order.cinemaId}, #{order.hallId}, #{order.screenId}, #{order.filmId}, #{order.seatName}, #{order.number}, #{order.price})
+    </insert>
+
+    <delete id="delete">
+        DELETE FROM
+            `order`
+        WHERE
+            id
+        IN
+        <foreach collection="ids" index="index" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </delete>
+
+    <select id="count" resultType="java.lang.Long">
+        SELECT
+            COUNT(id)
+        FROM
+            `order`
+        <where>
+            accountId = #{accountId}
+            <if test="null != id">
+                id = #{id}
+            </if>
+        </where>
+    </select>
+</mapper>

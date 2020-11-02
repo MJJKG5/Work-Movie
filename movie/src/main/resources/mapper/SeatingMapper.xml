@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gp.movie.repository.SeatingMapper">
+    <resultMap id="seatingMap" type="com.gp.movie.model.Seating">
+        <id column="id" property="id"/>
+        <result column="serialNo" property="serialNo"/>
+        <result column="name" property="name"/>
+        <result column="isUse" property="isUse"/>
+        <result column="filmId" property="filmId"/>
+        <result column="hallId" property="hallId"/>
+        <result column="cinemaId" property="cinemaId"/>
+        <result column="screenId" property="screenId"/>
+        <result column="cinemaName" property="cinemaName"/>
+        <result column="hallName" property="hallName"/>
+        <result column="filmName" property="filmName"/>
+        <result column="runTime" property="runTime"/>
+        <result column="playTime" property="playTime"/>
+        <result column="price" property="price"/>
+        <result column="img" property="img"/>
+    </resultMap>
+
+    <sql id="seatingList">id, serialNo, `name`, isUse, filmId, hallId, cinemaId, screenId</sql>
+
+    <select id="queryByList" resultMap="seatingMap">
+        SELECT
+            s.id AS id,
+            s.serialNo AS serialNo,
+            s.name AS name,
+            s.isUse AS isUse,
+            s.filmId AS filmId,
+            s.hallId AS hallId,
+            s.cinemaId AS cinemaId,
+            s.screenId AS screenId,
+            c.name AS cinemaName,
+            ch.name AS hallName,
+            f.name AS filmName,
+            f.runTime AS runTime,
+            sc.playTime AS playTime,
+            sc.price AS price,
+            f.img AS img
+        FROM
+            seating s
+        JOIN
+            cinema c
+        ON
+            s.cinemaId = c.id
+        JOIN
+            cinema_hall ch
+        ON
+            s.hallId = ch.id
+        JOIN
+            screening sc
+        ON
+            s.screenId = sc.id
+        JOIN
+            film f
+        ON
+            s.filmId = f.id
+        WHERE
+            s.screenId = #{screenId}
+    </select>
+
+    <select id="queryByIds" resultMap="seatingMap">
+        SELECT
+            <include refid="seatingList"/>
+        FROM
+            seating
+        WHERE
+            id
+        IN
+        <foreach collection="ids" index="index" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </select>
+
+    <insert id="adds">
+        INSERT INTO seating
+            (serialNo, `name`, filmId, hallId, cinemaId, screenId)
+        VALUES
+        <foreach collection="seats" index="index" item="item" separator=",">
+            (#{item.serialNo}, #{item.name}, #{item.filmId}, #{item.hallId}, #{item.cinemaId}, #{item.screenId})
+        </foreach>
+    </insert>
+
+    <update id="updateByIds">
+        UPDATE
+            seating
+        SET
+            isUse = 1
+        WHERE
+            id
+        IN
+        <foreach collection="ids" index="index" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </update>
+
+    <update id="updateByScreenId">
+        UPDATE seating
+        <set>
+            <if test="null != seat.hallId">
+                hallId = #{seat.hallId},
+            </if>
+            <if test="null != seat.cinemaId">
+                cinemaId = #{seat.cinemaId}
+            </if>
+        </set>
+        WHERE
+            screenId = #{seat.screenId}
+    </update>
+
+    <delete id="deleteByScreenId">
+        DELETE FROM seating WHERE screenId = #{screenId}
+    </delete>
+
+    <delete id="delete">
+        DELETE FROM seating WHERE id = #{id}
+    </delete>
+
+    <select id="count" resultType="java.lang.Long">
+        SELECT COUNT(id) FROM seating
+    </select>
+</mapper>

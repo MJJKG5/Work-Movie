@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gp.movie.repository.CinemaHallMapper">
+    <resultMap id="cinemaHallMap" type="com.gp.movie.model.CinemaHall">
+        <id column="id" property="id"/>
+        <result column="name" property="name"/>
+        <result column="row" property="row"/>
+        <result column="column" property="column"/>
+        <result column="cinemaId" property="cinemaId"/>
+        <result column="cinemaName" property="cinemaName"/>
+    </resultMap>
+
+    <sql id="cinemaHallList">id, `name`, `row`, `column`, cinemaId</sql>
+
+    <select id="queryByCinemaId" resultMap="cinemaHallMap">
+        SELECT
+            ch.id AS id,
+            ch.name AS name,
+            ch.row AS `row`,
+            ch.column AS `column`,
+            ch.cinemaId AS cinemaId,
+            c.name AS cinemaName
+        FROM
+            cinema_hall ch
+        JOIN
+            cinema c
+        ON
+            ch.cinemaId = c.id
+        <where>
+            <if test="null != name and '' != name">
+                `name` = #{name}
+            </if>
+            <if test="null != cinemaId">
+                cinemaId = #{cinemaId}
+            </if>
+        </where>
+        LIMIT
+            #{page.index}, #{page.pageSize}
+    </select>
+
+    <select id="queryById" resultType="com.gp.movie.model.CinemaHall">
+        SELECT
+            <include refid="cinemaHallList"/>
+        FROM
+            cinema_hall
+        WHERE
+            id = #{id}
+    </select>
+
+    <select id="queryByCinemaIdAndName" resultType="com.gp.movie.model.CinemaHall">
+        SELECT
+            <include refid="cinemaHallList"/>
+        FROM
+            cinema_hall
+        WHERE
+            cinemaId = #{cinemaId}
+        AND
+            `name` = #{name}
+    </select>
+
+    <insert id="add" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO cinema_hall
+            (`name`, `row`, `column`, cinemaId)
+        VALUES
+            (#{hall.name}, #{hall.row}, #{hall.column}, #{hall.cinemaId})
+    </insert>
+
+    <update id="update">
+        UPDATE cinema_hall
+        <set>
+            <if test="null != hall.name and '' != hall.name">
+                `name` = #{hall.name},
+            </if>
+            <if test="null != hall.cinemaId">
+                cinemaId = #{hall.cinemaId}
+            </if>
+        </set>
+        WHERE
+            id = #{hall.id}
+    </update>
+
+    <delete id="delete">
+        DELETE FROM cinema_hall WHERE id = #{id}
+    </delete>
+
+    <select id="count" resultType="java.lang.Long">
+        SELECT
+            COUNT(id)
+        FROM
+            cinema_hall
+        <where>
+            <if test="null != name and '' != name">
+                `name` = #{name}
+            </if>
+            <if test="null != cinemaId">
+                cinemaId = #{cinemaId}
+            </if>
+        </where>
+    </select>
+</mapper>

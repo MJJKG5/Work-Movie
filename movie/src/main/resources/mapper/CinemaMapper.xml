@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gp.movie.repository.CinemaMapper">
+    <resultMap id="cinemaMap" type="com.gp.movie.model.Cinema">
+        <id column="id" property="id"/>
+        <result column="name" property="name"/>
+        <result column="address" property="address"/>
+        <result column="createTime" property="createTime"/>
+    </resultMap>
+
+    <sql id="cinemaList">id, `name`, address, createTime</sql>
+
+    <select id="queryByList" resultMap="cinemaMap">
+        SELECT
+            <include refid="cinemaList"/>
+        FROM
+            cinema
+        <where>
+            <if test="null != name and '' != name">
+                `name` = #{name}
+            </if>
+        </where>
+        LIMIT
+            #{page.index}, #{page.pageSize}
+    </select>
+
+    <select id="queryByIds" resultMap="cinemaMap">
+        SELECT
+            <include refid="cinemaList"/>
+        FROM
+            cinema
+        WHERE
+            id
+        IN
+        <foreach collection="ids" index="index" item="item" open="(" separator=","  close=")">
+            #{item}
+        </foreach>
+        LIMIT
+            #{page.index}, #{page.pageSize}
+    </select>
+
+    <select id="queryByName" resultMap="cinemaMap">
+        SELECT
+            <include refid="cinemaList"/>
+        FROM
+            cinema
+        WHERE
+            `name` = ${name}
+    </select>
+
+    <insert id="add" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO cinema
+            (`name`, address)
+        VALUES
+            (#{cinema.name}, #{cinema.address})
+    </insert>
+
+    <update id="update">
+        UPDATE cinema
+        <set>
+            <if test="null != cinema.name and '' != cinema.name">
+                name = #{cinema.name},
+            </if>
+            <if test="null != cinema.address and '' != cinema.address">
+                address = #{cinema.address}
+            </if>
+        </set>
+        WHERE
+            id = #{cinema.id}
+    </update>
+
+    <delete id="delete">
+        DELETE FROM cinema WHERE id = #{id}
+    </delete>
+
+    <select id="count" resultType="java.lang.Long">
+        SELECT
+            COUNT(id)
+        FROM
+            cinema
+        <where>
+            <if test="null != name and '' != name">
+                `name` = #{name}
+            </if>
+        </where>
+    </select>
+</mapper>
