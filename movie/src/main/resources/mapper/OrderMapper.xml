@@ -60,9 +60,8 @@
         <where>
             o.accountId = #{accountId}
             <if test="null != id">
-                id = #{id}
+                AND id = #{id}
             </if>
-
         </where>
         LIMIT
             #{page.index}, #{page.pageSize}

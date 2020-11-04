@@ -105,9 +105,10 @@
             COUNT(id)
         FROM
             film
-        <if test="null != name and '' != name">
-        WHERE
-            `name` = #{name}
-        </if>
+        <where>
+            <if test="null != name and '' != name">
+                `name` = #{name}
+            </if>
+        </where>
     </select>
 </mapper>

@@ -85,16 +85,14 @@
             <include refid="screeningList"/>
         FROM
             screening
-        WHERE
+        <where>
             cinemaId = #{cinemaId}
-    <if test="null != playDate and '' != playDate">
-        AND
-            playDate = #{playDate}
-    </if>
-        AND
-            playTime &gt; now()
-        AND
-            filmId = #{filmId}
+            <if test="null != playDate and '' != playDate">
+                AND playDate = #{playDate}
+            </if>
+            AND playTime &gt; now()
+            AND filmId = #{filmId}
+        </where>
     </select>
 
     <select id="queryById" resultType="com.gp.movie.model.Screening">
@@ -164,13 +162,13 @@
                 s.filmId = #{filmId}
             </if>
             <if test="null != cinemaId">
-                s.id = #{cinemaId}
+                AND s.id = #{cinemaId}
             </if>
             <if test="null != cinemaName and '' != cinemaName">
-                c.name = #{cinemaName}
+                AND c.name = #{cinemaName}
             </if>
             <if test="null != playDate and '' != playDate">
-                s.playDate &gt;= #{playDate}
+                AND s.playDate &gt;= #{playDate}
             </if>
         </where>
     </select>

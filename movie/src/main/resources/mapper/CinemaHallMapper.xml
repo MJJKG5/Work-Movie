@@ -31,7 +31,7 @@
                 `name` = #{name}
             </if>
             <if test="null != cinemaId">
-                cinemaId = #{cinemaId}
+                AND cinemaId = #{cinemaId}
             </if>
         </where>
         LIMIT
@@ -93,7 +93,7 @@
                 `name` = #{name}
             </if>
             <if test="null != cinemaId">
-                cinemaId = #{cinemaId}
+                AND cinemaId = #{cinemaId}
             </if>
         </where>
     </select>
